@@ -110,12 +110,9 @@ export function Header({ currentPath }: HeaderProps) {
         </div>
 
         <div className="hidden md:flex flex-col items-end mr-4 text-right">
-          <p className="text-xs text-muted-foreground capitalize">{today}</p>
-        </div>
-
-        <div className="hidden md:flex flex-col items-end mr-4 text-right">
           <p className="text-sm font-medium text-foreground">{session?.user.name ?? "Usuario"}</p>
           <p className="text-xs text-muted-foreground">{roleLabel}</p>
+          <p className="text-xs text-muted-foreground capitalize">{today}</p>
         </div>
 
         <div className="flex items-center gap-2">

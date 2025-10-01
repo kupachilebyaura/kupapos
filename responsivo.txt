@@ -1,0 +1,222 @@
+Como desarrollador web senior, te dejo una guía práctica y accionable para dimensionar y hacer responsive un sitio profesional que se vea impecable en smartphones, tablets, laptops, desktops, monitores 2K y 4K.
+
+1) Filosofía base
+	•	Mobile-first + fluid-first: empieza con layout fluido y mejora progresivamente con media/container queries.
+	•	Content-first: limita el ancho de lectura a 60–80 caracteres (60–80ch); usa secciones full-bleed solo para visuales.
+	•	Escala tipográfica y espaciado con clamp() para que todo fluya entre breakpoints.
+	•	Container queries (si puedes) > media queries globales; cada bloque se adapta según su contenedor, no solo la ventana.
+
+⸻
+
+2) Breakpoints recomendados (mínimos)
+
+Cubre el parque real sin “sobre-segmentar”. Usa min-width (mobile-first).
+
+Alias	min-width	Dispositivos típicos	Uso clave
+xs	360px	móviles pequeños	navegación básica, 1 columna
+sm	480px	móviles comunes	mejora tipografía y paddings
+md	768px	tablets vertical	2 columnas, menú más rico
+lg	1024px	tablet horiz / laptops	12-col grid, sidebar opcional
+xl	1280px	desktop estándar	contenedor ancho de lectura
+2xl	1440px	desktop amplio	cards más grandes, 3-4 col
+uhd	1920px	1080p / 2K	max-width contenido, full-bleed héroes
+4k	2560px	1440p/2160p	limita lectura, aumenta gutters
+
+Regla de oro en 2K/4K: no dejes que el texto se haga “infinito”. Mantén el contenido en max-width 72–90rem (≈1152–1440px) centrado, y permite bandas full-bleed (imágenes, fondos) para aprovechar el espacio visual sin romper legibilidad.
+
+⸻
+
+3) Anchos de contenedor y gutters
+
+:root {
+  --container-max: 90rem;   /* 1440px contenido principal */
+  --container-pad: clamp(1rem, 3vw, 2rem); /* gutters fluidos */
+}
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+.section--fullbleed { /* para héroes/visualizaciones */
+  inline-size: 100%;
+}
+
+
+⸻
+
+4) Tipografía fluida (accesible y legible)
+	•	Body: 16–18px móviles → 18–20px desktop.
+	•	Line-height: 1.5–1.7 en párrafos.
+	•	Titulares: escala fluida con clamp().
+
+:root{
+  --step--1: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);    /* leyendas */
+  --step-0:  clamp(1rem, 0.9rem + 0.6vw, 1.125rem);    /* body */
+  --step-1:  clamp(1.25rem, 1.1rem + 1vw, 1.5rem);     /* h5 */
+  --step-2:  clamp(1.5rem, 1.2rem + 1.6vw, 2rem);      /* h4 */
+  --step-3:  clamp(1.875rem, 1.3rem + 2.6vw, 2.5rem);  /* h3 */
+  --step-4:  clamp(2.25rem, 1.4rem + 3.6vw, 3rem);     /* h2 */
+  --step-5:  clamp(2.75rem, 1.6rem + 4.8vw, 3.75rem);  /* h1 */
+}
+body{ font-size: var(--step-0); }
+h1{ font-size: var(--step-5); line-height:1.1; }
+h2{ font-size: var(--step-4); line-height:1.2; }
+p{ max-width: 65ch; }
+
+
+⸻
+
+5) Grid responsivo (12 columnas a partir de lg)
+
+.grid {
+  display: grid;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+}
+.grid--cards {
+  grid-template-columns: 1fr;
+}
+@media (min-width:768px){
+  .grid--cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (min-width:1280px){
+  .grid--cards { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+@media (min-width:1440px){
+  .grid--cards { grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+
+
+⸻
+
+6) Imágenes y 2K/4K (DPR, srcset, formatos)
+	•	Formatos: AVIF → WebP → JPG fallback.
+	•	srcset + sizes: entrega ancho correcto según viewport; además, provee densidades 1x/2x para pantallas retina/4K.
+
+<img
+  src="hero-1280.jpg"
+  srcset="
+    hero-768.avif 768w,  hero-1280.avif 1280w,
+    hero-1920.avif 1920w, hero-2560.avif 2560w
+  "
+  sizes="(min-width:1440px) 1280px, (min-width:768px) 90vw, 100vw"
+  width="1280" height="720" alt="Hero"
+/>
+
+	•	Lazy-load (loading="lazy") excepto LCP (imagen principal).
+	•	aspect-ratio para evitar layout shifts:
+
+.card__media { aspect-ratio: 16 / 9; object-fit: cover; }
+
+
+⸻
+
+7) Controles táctiles y ergonomía
+	•	Objetivos táctiles: mínimo 44×44px.
+	•	Espaciado entre controles: ≥ 8–12px.
+	•	Gestos: no dependas solo de hover; usa :focus-visible y estados activos.
+
+button, a { min-inline-size: 44px; min-block-size: 44px; }
+:focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+
+
+⸻
+
+8) Queries modernas (capabilities y preferencias)
+
+Usa media queries por capacidad, no por dispositivo:
+
+@media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+@media (hover: hover) and (pointer: fine){ .card:hover{ transform: translateY(-4px); } }
+@media (orientation: landscape){ /* ajustes de hero en tablets horizontales */ }
+@media (prefers-color-scheme: dark){ /* paleta dark accesible */ }
+
+
+⸻
+
+9) Safe areas (notch) y viewport
+
+:root{ --safe: env(safe-area-inset); }
+.header { padding-top: calc(1rem + env(safe-area-inset-top)); }
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+
+⸻
+
+10) Menús y navegación
+	•	Header sticky con sombra suave al hacer scroll.
+	•	Mobile: offcanvas o dialog accesible; evita submenús anidados profundos.
+	•	Desktop: mega-menu con 2–3 niveles máximo, foco por teclado.
+
+⸻
+
+11) Rendimiento (Core Web Vitals)
+	•	CSS crítico inline (≤ 20KB) + diferir el resto.
+	•	JS mínimo; evita dependencias pesadas para UI simple.
+	•	Preload de fuentes WOFF2 y font-display: swap.
+	•	Cache fuerte para estáticos + immutable.
+	•	Evita CLS: define tamaños (width/height, aspect-ratio) en medios y ads/embeds.
+
+⸻
+
+12) Matriz de pruebas sugerida
+	•	Móvil: 360×640, 390×844, 412×915.
+	•	Tablet: 768×1024 (v/h), 820×1180.
+	•	Laptop: 1366×768, 1440×900.
+	•	Desktop: 1920×1080, 2560×1440, 3840×2160.
+	•	Navegadores: Chrome, Safari, Firefox, Edge (últimas 2 versiones).
+	•	Accesibilidad rápida: navegación por teclado, contraste AA, lector de pantalla en formularios.
+
+⸻
+
+13) Ejemplo rápido con Tailwind (si lo usas)
+
+// tailwind.config.js
+module.exports = {
+  theme: {
+    container: { center: true, padding: { DEFAULT: '1rem', lg: '2rem' } },
+    extend: {
+      maxWidth: { 'content': '90rem' }, // ~1440px
+      screens: { '2xl': '1440px', 'uhd': '1920px', '4k': '2560px' },
+      spacing: { 'safe': 'env(safe-area-inset-top)' },
+      fontSize: {
+        base: ['clamp(1rem,0.9rem+0.6vw,1.125rem)', '1.6'],
+        h1: ['clamp(2.75rem,1.6rem+4.8vw,3.75rem)', '1.1'],
+      },
+    }
+  }
+}
+
+<header class="sticky top-0 bg-white/80 backdrop-blur z-50">
+  <nav class="container max-w-content flex items-center justify-between py-3">
+    <a class="text-xl font-bold">Aura Solutions</a>
+    <button class="md:hidden">Menu</button>
+    <ul class="hidden md:flex gap-6">
+      <li><a class="py-2">Soluciones</a></li>
+      <li><a class="py-2">Industrias</a></li>
+      <li><a class="py-2">Recursos</a></li>
+      <li><a class="py-2">Contacto</a></li>
+    </ul>
+  </nav>
+</header>
+<main class="container max-w-content px-4 md:px-6">
+  <!-- secciones -->
+</main>
+<section class="section--fullbleed">
+  <!-- hero full ancho con imagen responsive -->
+</section>
+
+
+⸻
+
+14) Checklist express antes de publicar
+	•	Max-width contenido 72–90rem y lectura 60–80ch.
+	•	Imágenes con srcset/sizes y AVIF/WebP, LCP optimizada.
+	•	Tipografía/espaciado con clamp(); line-height 1.5–1.7.
+	•	Touch targets ≥44px; :focus-visible presente.
+	•	prefers-reduced-motion respetado.
+	•	Menú accesible (teclado/ARIA).
+	•	CLS ≈ 0 (placeholders o aspect-ratio en medios).
+	•	Dark mode opcional con buen contraste.
+	•	Testing en 360, 768, 1280, 1440, 1920, 2560.
