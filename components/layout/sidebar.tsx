@@ -21,7 +21,7 @@ const navigation = [
 
 export function Sidebar({ currentPath, className }: SidebarProps) {
   return (
-    <div className={cn("flex flex-col h-full bg-sidebar border-r overflow-y-auto", className)}>
+    <div className={cn("flex flex-col h-full bg-sidebar border-r border-sidebar-border overflow-y-auto", className)}>
       <div className="flex items-center h-16 px-6 border-b border-sidebar-border">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">

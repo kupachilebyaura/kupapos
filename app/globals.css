@@ -176,11 +176,19 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
   body {
     color: var(--color-text);
     background-color: var(--color-bg);
     font-family: var(--font-geist-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100vh;
   }
 
   hr {
@@ -193,5 +201,20 @@
 
   a:hover {
     color: color-mix(in srgb, var(--color-primary) 80%, var(--color-accent));
+  }
+}
+
+/* Layout utilities */
+@layer utilities {
+  .app-container {
+    @apply w-full max-w-full mx-auto;
+  }
+
+  .content-with-sidebar {
+    @apply lg:ml-64;
+  }
+
+  .page-padding {
+    @apply px-4 py-6 lg:px-8 lg:py-8;
   }
 }

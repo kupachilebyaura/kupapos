@@ -89,8 +89,8 @@ export function Header({ currentPath }: HeaderProps) {
   }
 
   return (
-    <header className="border-b bg-card/60 backdrop-blur-sm sticky top-0 z-30">
-      <div className="flex h-16 items-center justify-between px-4 gap-4">
+    <header className="border-b bg-card/60 backdrop-blur-sm sticky top-0 z-30 w-full">
+      <div className="flex h-16 items-center justify-between px-4 lg:px-6 gap-4 max-w-full">
         <div className="flex flex-1 items-center gap-3">
           <MobileSidebar currentPath={currentPath} />
 
