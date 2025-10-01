@@ -98,7 +98,7 @@ export function Header({ currentPath }: HeaderProps) {
             <div className="w-10 h-10 relative">
               <Image src="/kupa-logo.png" alt="Küpa POS" width={40} height={40} className="object-contain" />
             </div>
-            <h1 className="text-lg font-semibold tracking-tight">Küpa POS</h1>
+            <h1 className="text-sm font-semibold text-foreground">{businessName || "Küpa POS"}</h1>
           </div>
 
           <div className="flex-1 max-w-xl">
@@ -110,7 +110,6 @@ export function Header({ currentPath }: HeaderProps) {
         </div>
 
         <div className="hidden md:flex flex-col items-end mr-4 text-right">
-          <p className="text-sm font-semibold text-foreground">{businessName || "Negocio"}</p>
           <p className="text-xs text-muted-foreground capitalize">{today}</p>
         </div>
 
