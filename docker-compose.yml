@@ -1,0 +1,105 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: kupa-pos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kupauser
+      POSTGRES_PASSWORD: kupapass
+      POSTGRES_DB: kupapos
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kupauser -d kupapos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kupa-network
+
+  # Redis (for future token blacklist and caching)
+  redis:
+    image: redis:7-alpine
+    container_name: kupa-pos-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass kupapass
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kupa-network
+
+  # Next.js Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    container_name: kupa-pos-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://kupauser:kupapass@postgres:5432/kupapos?schema=public
+      - REDIS_URL=redis://:kupapass@redis:6379
+      - JWT_SECRET=dev-secret-change-in-production
+      - JWT_EXPIRES_IN=3600
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - kupa-network
+    command: npm run dev
+
+  # Prisma Studio (Database GUI)
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: kupa-pos-prisma-studio
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://kupauser:kupapass@postgres:5432/kupapos?schema=public
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kupa-network
+    command: npx prisma studio --port 5555 --browser none
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  kupa-network:
+    driver: bridge
